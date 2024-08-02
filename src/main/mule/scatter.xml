@@ -71,5 +71,6 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger1" doc:id="71b5fc99-bfe4-4439-8f6b-4c499040ce7a" message='#["After getting out of  scatter"]' />
+		<logger level="INFO" doc:name="Logger2" doc:id="5947f3c3-dcab-477e-9423-34abe150ed97" />
 	</flow>
 </mule>
