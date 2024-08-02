@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b59e2a50-bf38-403f-8076-e4f964b69d2a" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0424f206-944b-477b-941b-6a14ca38e85f" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="@Gouri123" database="atm" />
+	</db:config>
+	<db:config name="Database_Config23" doc:name="Database Config" doc:id="33d42493-5970-4c19-ba12-bf6b02a12b46" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="@Gouri123" database="atm" />
+	</db:config>
+	<http:request-config name="HTTP_Request_configuration11" doc:name="HTTP Request configuration" doc:id="f930d79a-452d-4a99-ba37-de2f6eee1e38" >
+		<http:request-connection protocol="HTTPS" host="dummy.restapiexample.com/api/v1/employees" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="357b72ac-2745-4352-82ef-69d74b4a2f0d" >
+		<http:request-connection host="dummy.restapiexample.com/api/v1/employees" />
+	</http:request-config>
+	<flow name="scatterFlow" doc:id="fe0e1d33-04db-4a5d-9b38-8c0e814843e1" >
+		<http:listener doc:name="Listener" doc:id="efca72eb-c24e-4660-b832-227a2f306bf2" config-ref="HTTP_Listener_config" path="/scatter"/>
+		<logger level="INFO" doc:name="Logger" doc:id="de9fc950-dcf3-44ef-bed0-c8ac646e68b3" message='#["Before getting into scatter"]'/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="bf4c7f0e-8b80-488e-a364-4a5050e8f9f5" >
+			<route >
+				<file:read doc:name="Read" doc:id="50262fca-07b1-4d5b-91c7-e123b9049783" path="C:\\Users\\admin\\Desktop\\file.csv" />
+				<ee:transform doc:name="Transform Message" doc:id="e2d60f2d-5530-4460-aa51-c329526b7033" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<db:select doc:name="Select" doc:id="140738d4-8af0-43b3-a720-40548a42d52d" config-ref="Database_Config23">
+					<db:sql><![CDATA[SELECT * FROM atm.Bank_Transactions]]></db:sql>
+				</db:select>
+				<ee:transform doc:name="Transform Message" doc:id="697178b0-5f8c-44db-afdc-cb378e4ce4fa" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Request" doc:id="8aab0a45-38a2-4ac9-b7c2-e953ff92d984" config-ref="HTTP_Request_configuration" url="https://dummy.restapiexample.com/api/v1/employees"/>
+				<ee:transform doc:name="Transform Message" doc:id="b80dfc21-f29d-4c78-b09b-2ec6e7e79be4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="2e202aab-cca6-4e25-8c5c-42ee6ea0805b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger1" doc:id="71b5fc99-bfe4-4439-8f6b-4c499040ce7a" message='#["After getting out of  scatter"]' />
+	</flow>
+</mule>
